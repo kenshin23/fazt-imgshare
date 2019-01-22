@@ -10,9 +10,21 @@ const ctrl = {
 };
 
 ctrl.index = async (req, res) => {
+	const viewModel = {
+		image: {},
+		comments: {}
+	};
 	const image = await Image.findOne({ filename: { $regex: req.params.image_id } });
-	const comments = await Comment.find({ image_id: image.id });
-	res.render('image', {image, comments});
+	if(image){
+		image.views += 1;
+		await image.save();
+		viewModel.image = image;
+		const comments = await Comment.find({ image_id: image.id });
+		viewModel.comments = comments;
+		res.render('image', viewModel);
+	} else {
+		res.redirect('/');
+	}
 };
 
 ctrl.create = (req, res) => {
@@ -46,8 +58,15 @@ ctrl.create = (req, res) => {
 	saveImage();
 };
 
-ctrl.like = (req, res) => {
-
+ctrl.like = async (req, res) => {
+	const image = await Image.findOne({ filename: { $regex: req.params.image_id } });
+	if(image){
+		image.likes += 1;
+		await image.save();
+		res.json({likes: image.likes});
+	} else {
+		res.status(500).json({error: 'Internal error.'});
+	}
 };
 
 ctrl.comment = async (req, res) => {
@@ -58,6 +77,8 @@ ctrl.comment = async (req, res) => {
 		newComment.image_id = image.id;
 		newComment.save();
 		res.redirect('/images/' + image.uniqueId);
+	} else {
+		res.redirect('/');
 	}
 };
 
