@@ -8,8 +8,10 @@ const ctrl = {
 
 };
 
-ctrl.index = (req, res) => {
-	
+ctrl.index = async (req, res) => {
+	const image = await Image.findOne({ filename: { $regex: req.params.image_id } });
+	console.log(image);
+	res.render('image', {image});
 };
 
 ctrl.create = (req, res) => {
@@ -33,8 +35,7 @@ ctrl.create = (req, res) => {
 					description: req.body.description
 				});
 				const imageSaved = await newImg.save();
-				//res.redirect('/images');
-				res.send('It works!');
+				res.redirect('/images/' + imgUrl);
 			} else {
 				await fs.unlink(imageTempPath);
 				res.status(500).json({error: 'Only images are allowed'});
