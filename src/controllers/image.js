@@ -82,8 +82,16 @@ ctrl.comment = async (req, res) => {
 	}
 };
 
-ctrl.remove = (req, res) => {
-
+ctrl.remove = async (req, res) => {
+	const image = await Image.findOne({ filename: { $regex: req.params.image_id } });
+	if(image){
+		await fs.unlink(path.resolve('./src/public/uploads/' + image.filename));
+		await Comment.deleteOne({image_id: image._id});
+		await image.remove();
+		res.json(true);
+	} else {
+		res.redirect('/images/' + image.uniqueId);
+	}
 };
 
 module.exports = ctrl;
