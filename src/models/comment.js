@@ -13,9 +13,12 @@ const CommentSchema = new Schema({
 	timestamp: { type: Date, default: Date.now },
 });
 
-CommentSchema.virtual('uniqueId')
-	.get(function (){
-		return this.filename.replace(path.extname(this.filename), '');
+CommentSchema.virtual('image')
+	.set(function (image){
+		this._image = image;
+	})
+	.get(function (image){
+		return this._image;
 	});
 
 module.exports = model('Comment', CommentSchema);

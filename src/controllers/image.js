@@ -4,13 +4,12 @@ const fs = require('fs-extra');
 const md5 = require('md5');
 
 const { Image, Comment } = require('../models');
+const sidebar = require('../helpers/sidebar');
 
-const ctrl = {
-
-};
+const ctrl = {};
 
 ctrl.index = async (req, res) => {
-	const viewModel = {
+	let viewModel = {
 		image: {},
 		comments: {}
 	};
@@ -19,8 +18,9 @@ ctrl.index = async (req, res) => {
 		image.views += 1;
 		await image.save();
 		viewModel.image = image;
-		const comments = await Comment.find({ image_id: image.id });
+		const comments = await Comment.find({ image_id: image._id });
 		viewModel.comments = comments;
+		viewModel = await sidebar(viewModel);
 		res.render('image', viewModel);
 	} else {
 		res.redirect('/');
